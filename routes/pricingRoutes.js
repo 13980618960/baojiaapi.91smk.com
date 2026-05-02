@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const router = express.Router();
 const { adminAuthMiddleware } = require('../middleware/auth');
 
@@ -13,7 +13,7 @@ const AdFund = require('../models/AdFund');
 const AdFundRecord = require('../models/AdFundRecord');
 const AdPosition = require('../models/AdPosition');
 
-// ==================== 骞冲彴骞垮憡鏀惰垂瑙勫垯 ====================
+// ==================== 平台广告收费规则 ====================
 
 router.get('/ad-pricing', adminAuthMiddleware, async (req, res) => {
   try {
@@ -45,6 +45,59 @@ router.put('/ad-pricing/:id', adminAuthMiddleware, async (req, res) => {
 router.delete('/ad-pricing/:id', adminAuthMiddleware, async (req, res) => {
   try {
     await AdPricingRule.update({ is_active: 0 }, { where: { rule_id: req.params.id } });
+    res.success();
+  } catch (error) {
+    res.error(error.message);
+  }
+});
+
+// 前端调用路径 - 获取广告定价规则列表
+router.get('/ads', adminAuthMiddleware, async (req, res) => {
+  try {
+    const rules = await AdPricingRule.findAll({ order: [['ad_type', 'ASC'], ['rule_id', 'DESC']] });
+    res.success(rules);
+  } catch (error) {
+    res.error(error.message);
+  }
+});
+
+// 前端调用路径 - 创建广告定价规则
+router.post('/ads/create', adminAuthMiddleware, async (req, res) => {
+  try {
+    const rule = await AdPricingRule.create(req.body);
+    res.success(rule);
+  } catch (error) {
+    res.error(error.message);
+  }
+});
+
+// 前端调用路径 - 更新广告定价规则
+router.post('/ads/update', adminAuthMiddleware, async (req, res) => {
+  try {
+    await AdPricingRule.update(req.body, { where: { rule_id: req.body.rule_id } });
+    res.success();
+  } catch (error) {
+    res.error(error.message);
+  }
+});
+
+// 前端调用路径 - 删除广告定价规则
+router.post('/ads/delete', adminAuthMiddleware, async (req, res) => {
+  try {
+    await AdPricingRule.update({ is_active: 0 }, { where: { rule_id: req.body.rule_id } });
+    res.success();
+  } catch (error) {
+    res.error(error.message);
+  }
+});
+
+// 前端调用路径 - 切换广告定价规则状态
+router.post('/ads/toggle', adminAuthMiddleware, async (req, res) => {
+  try {
+    const rule = await AdPricingRule.findByPk(req.body.rule_id);
+    if (rule) {
+      await AdPricingRule.update({ is_active: rule.is_active === 1 ? 0 : 1 }, { where: { rule_id: req.body.rule_id } });
+    }
     res.success();
   } catch (error) {
     res.error(error.message);
@@ -389,7 +442,64 @@ router.get('/ad-positions/miniprogram', async (req, res) => {
   }
 });
 
-// ==================== 閭€璇峰鍔辫鍒?====================
+// ==================== 邀请奖励规则 ====================
+
+// 前端调用路径 - 获取邀请奖励规则列表
+router.get('/ads-invitation', adminAuthMiddleware, async (req, res) => {
+  try {
+    const rules = await InvitationRule.findAll({ 
+      where: { is_active: 1 },
+      order: [['rule_mode', 'ASC'], ['required_invites', 'ASC']],
+      include: [{ model: AdPosition, as: 'positionInfo' }]
+    });
+    res.success(rules);
+  } catch (error) {
+    res.error(error.message);
+  }
+});
+
+// 前端调用路径 - 创建邀请奖励规则
+router.post('/ads-invitation/create', adminAuthMiddleware, async (req, res) => {
+  try {
+    const rule = await InvitationRule.create(req.body);
+    res.success(rule);
+  } catch (error) {
+    res.error(error.message);
+  }
+});
+
+// 前端调用路径 - 更新邀请奖励规则
+router.post('/ads-invitation/update', adminAuthMiddleware, async (req, res) => {
+  try {
+    await InvitationRule.update(req.body, { where: { rule_id: req.body.rule_id } });
+    res.success();
+  } catch (error) {
+    res.error(error.message);
+  }
+});
+
+// 前端调用路径 - 删除邀请奖励规则
+router.post('/ads-invitation/delete', adminAuthMiddleware, async (req, res) => {
+  try {
+    await InvitationRule.update({ is_active: 0 }, { where: { rule_id: req.body.rule_id } });
+    res.success();
+  } catch (error) {
+    res.error(error.message);
+  }
+});
+
+// 前端调用路径 - 切换邀请奖励规则状态
+router.post('/ads-invitation/toggle', adminAuthMiddleware, async (req, res) => {
+  try {
+    const rule = await InvitationRule.findByPk(req.body.rule_id);
+    if (rule) {
+      await InvitationRule.update({ is_active: rule.is_active === 1 ? 0 : 1 }, { where: { rule_id: req.body.rule_id } });
+    }
+    res.success();
+  } catch (error) {
+    res.error(error.message);
+  }
+});
 
 router.get('/invitation-rules', adminAuthMiddleware, async (req, res) => {
   try {
