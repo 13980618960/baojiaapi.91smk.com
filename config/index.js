@@ -27,7 +27,7 @@ module.exports = {
   },
   
   upload: {
-    path: path.join(__dirname, '../uploads'),
+    path: path.resolve(__dirname, '../uploads'),
     maxSize: process.env.MAX_FILE_SIZE || 52428800,
     allowedExt: ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.xsl', '.xslt', '.zip']
   },
