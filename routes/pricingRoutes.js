@@ -166,38 +166,7 @@ router.get('/funds', adminAuthMiddleware, async (req, res) => {
   }
 });
 
-// 前端调用路径 - 获取资金账户列表
-router.get('/pricing/funds', adminAuthMiddleware, async (req, res) => {
-  try {
-    const User = require('../models/User');
-    const funds = await AdFund.findAll({ 
-      where: { is_active: 1 }, 
-      order: [['fund_id', 'ASC']],
-      include: [
-        {
-          model: User,
-          as: 'user',
-          attributes: ['user_id', 'nickname', 'real_name', 'phone']
-        }
-      ]
-    });
-    
-    const platformTotalIncome = funds.reduce((sum, fund) => sum + parseFloat(fund.total_income || 0), 0);
-    const totalRecharge = funds.reduce((sum, fund) => sum + parseFloat(fund.total_income || 0), 0);
-    const totalRemaining = funds.reduce((sum, fund) => sum + parseFloat(fund.balance || 0), 0);
-    
-    res.success({
-      list: funds,
-      platformTotalIncome,
-      totalRecharge,
-      totalRemaining
-    });
-  } catch (error) {
-    res.error(error.message);
-  }
-});
-
-// 鑾峰彇鐢ㄦ埛鍒楄〃锛堢敤浜庨€夋嫨锛?
+// 获取用户列表（用于选择）
 router.get('/users/list', adminAuthMiddleware, async (req, res) => {
   try {
     const User = require('../models/User');
